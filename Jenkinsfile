@@ -15,6 +15,12 @@ pipeline {
       }
     }
 
+    stage('Debug Path') {
+      steps {
+        sh 'ls -la && pwd'
+  }
+}
+
     stage('Terraform Apply - Create EKS & ECR') {
       steps {
         dir('tf-jk-k8s') {
