@@ -14,10 +14,13 @@ pipeline {
           $class: 'AmazonWebServicesCredentialsBinding',
           credentialsId: 'aws_credentials1'
         ]]) {
-          // 👇 Switch to parent folder where .tf files are
-          dir('../') {
-            sh 'terraform init -reconfigure'
-            sh 'terraform destroy -auto-approve'
+          // 👇 Dynamically go to the root of the Git repo
+          dir("${env.WORKSPACE}") {
+            sh '''
+              echo ">> Destroying Terraform-managed resources"
+              terraform init -reconfigure
+              terraform destroy -auto-approve
+            '''
           }
         }
       }
