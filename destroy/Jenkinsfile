@@ -6,11 +6,19 @@ pipeline {
   }
 
   stages {
+    stage('Checkout Code') {
+      steps {
+        checkout scm
+      }
+    }
+
     stage('Terraform Destroy Infra') {
       steps {
         dir('tf-jk-k8s') {
-          sh 'terraform init'
-          sh 'terraform destroy -auto-approve'
+          sh '''
+            terraform init
+            terraform destroy -auto-approve
+          '''
         }
       }
     }
