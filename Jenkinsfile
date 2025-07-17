@@ -23,10 +23,8 @@ pipeline {
 
     stage('Terraform Apply - Create EKS & ECR') {
       steps {
-        dir('tf-jk-k8s') {
           sh 'terraform init'
           sh 'terraform apply -auto-approve'
-        }
       }
     }
 
