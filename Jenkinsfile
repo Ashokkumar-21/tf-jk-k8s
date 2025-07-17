@@ -15,16 +15,22 @@ pipeline {
       }
     }
 
-    stage('Debug Path') {
+    stage('Inject AWS Credentials') {
       steps {
-        sh 'ls -la && pwd'
-  }
-}
+        withCredentials([usernamePassword(credentialsId: 'aws_credentials',
+                                          usernameVariable: 'AWS_ACCESS_KEY_ID',
+                                          passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            echo "==> Identity check"
+            aws sts get-caller-identity
 
-    stage('Terraform Apply - Create EKS & ECR') {
-      steps {
-          sh 'terraform init -reconfigure'
-          sh 'terraform apply -auto-approve'
+            echo "==> Terraform Init"
+            terraform init -reconfigure
+
+            echo "==> Terraform Apply"
+            terraform apply -auto-approve
+          '''
+        }
       }
     }
 
