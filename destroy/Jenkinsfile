@@ -12,9 +12,9 @@ pipeline {
       steps {
         withCredentials([[
           $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws_credentials1'
+          credentialsId: 'aws_credentials'
         ]]) {
-          // 👇 This tells Jenkins to go to the parent directory
+          // 👇 Switch to parent folder where .tf files are
           dir('../') {
             sh 'terraform init -reconfigure'
             sh 'terraform destroy -auto-approve'
