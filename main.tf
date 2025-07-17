@@ -12,6 +12,8 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_availability_zones" "available" {}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.2"
@@ -32,8 +34,6 @@ module "vpc" {
     Environment = "dev"
   }
 }
-
-data "aws_availability_zones" "available" {}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -57,13 +57,12 @@ module "eks" {
   }
 
   tags = {
-    Terraform   = "true"
+    Terraform = "true"
     Environment = "dev"
   }
-  
 }
 
-resource "aws_ecr_repository" "static_site_repo" {
+resource "aws_ecr_repository" "static_nginx" {
   name = "static-nginx"
 
   image_scanning_configuration {
@@ -71,7 +70,7 @@ resource "aws_ecr_repository" "static_site_repo" {
   }
 
   tags = {
-    Name        = "static-nginx"
+    Name = "static-nginx"
     Environment = "dev"
   }
 }
