@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: k8s-apps
 spec:
-  replicas:1
+  replicas: 1
   selector:
     mathcLabels:
       app: k8s
