@@ -8,17 +8,11 @@ pipeline {
     ECR_REPO_NAME = 'static-nginx'
   }
 
-  stages {
-    stage('Checkout Code') {
+ stages {
+    stage('Terraform Destroy') {
       steps {
-        checkout scm
-      }
-    }
-
-    stage('Terraform Destroy Infra') {
-      steps {
-        dir('../') {  // Go to the root folder with main.tf
-          withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials1']]) {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials1']]) {
+          dir('../') {
             sh 'terraform init -reconfigure'
             sh 'terraform destroy -auto-approve'
           }
