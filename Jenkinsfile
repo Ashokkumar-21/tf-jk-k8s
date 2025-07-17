@@ -11,45 +11,58 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh 'docker build -t $ECR_REPO_NAME:$IMAGE_TAG .'
-                }
-            }
-        }
-
-        stage('Tag Image') {
-            steps {
-                script {
-                    sh 'docker tag $ECR_REPO_NAME:$IMAGE_TAG $FULL_IMAGE_NAME'
-                }
-            }
-        }
-
-        stage('Login to AWS ECR') {
-            steps {
-                script {
-                    sh '''
-                        aws ecr get-login-password --region $AWS_REGION | \
-                        docker login --username AWS --password-stdin $ECR_REGISTRY
-                    '''
-                }
-            }
-        }
-
-        stage('Push to ECR') {
-            steps {
-                script {
-                    sh 'docker push $FULL_IMAGE_NAME'
-                }
-            }
-        }
+    stage('Checkout Code') {
+      steps {
+        checkout scm
+      }
     }
+
+    stage('Terraform Apply - Create EKS & ECR') {
+      steps {
+        dir('tf-jk-k8s') {
+          sh 'terraform init'
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+
+    stage('Configure kubectl for EKS') {
+      steps {
+        sh 'aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER}'
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t ${ECR_REPO}:latest .'
+      }
+    }
+
+    stage('Login to ECR') {
+      steps {
+        sh '''
+          aws ecr get-login-password --region ${AWS_REGION} | \
+          docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+        '''
+      }
+    }
+
+    stage('Tag & Push Image to ECR') {
+      steps {
+        sh '''
+          docker tag ${ECR_REPO}:latest ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:latest
+          docker push ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:latest
+        '''
+      }
+    }
+
+    stage('Deploy to EKS') {
+      steps {
+        sh '''
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
+        '''
+      }
+    }
+  }
 }
