@@ -4,14 +4,17 @@ pipeline {
   environment {
     AWS_REGION = 'ap-south-1'
     AWS_ACCOUNT_ID = '098588167308'
-    CLUSTER_NAME = 'devops-eks-cluster'
-    ECR_REPO_NAME = 'static-nginx'
+    CLUSTER = 'devops-eks-cluster'
   }
 
- stages {
+  stages {
     stage('Terraform Destroy') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials1']]) {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws_credentials'
+        ]]) {
+          // 👇 This tells Jenkins to go to the parent directory
           dir('../') {
             sh 'terraform init -reconfigure'
             sh 'terraform destroy -auto-approve'
