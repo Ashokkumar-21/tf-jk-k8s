@@ -23,7 +23,7 @@ pipeline {
 
     stage('Terraform Apply - Create EKS & ECR') {
       steps {
-          sh 'terraform init'
+          sh 'terraform init -reconfigure'
           sh 'terraform apply -auto-approve'
       }
     }
