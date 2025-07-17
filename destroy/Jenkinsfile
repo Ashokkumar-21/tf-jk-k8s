@@ -3,6 +3,9 @@ pipeline {
 
   environment {
     AWS_REGION = 'ap-south-1'
+    AWS_ACCOUNT_ID = '098588167308'
+    CLUSTER_NAME = 'devops-eks-cluster'
+    ECR_REPO_NAME = 'static-nginx'
   }
 
   stages {
@@ -14,13 +17,19 @@ pipeline {
 
     stage('Terraform Destroy Infra') {
       steps {
-        dir('tf-jk-k8s') {
-          sh '''
-            terraform init
-            terraform destroy -auto-approve
-          '''
+        dir('../') {  // Go to the root folder with main.tf
+          withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
+            sh 'terraform init -reconfigure'
+            sh 'terraform destroy -auto-approve'
+          }
         }
       }
+    }
+  }
+
+  post {
+    always {
+      echo 'Terraform Destroy Job completed!'
     }
   }
 }
