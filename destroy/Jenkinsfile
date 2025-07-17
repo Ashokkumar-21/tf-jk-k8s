@@ -12,7 +12,7 @@ pipeline {
       steps {
         withCredentials([[
           $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws_credentials'
+          credentialsId: 'aws_credentials1'
         ]]) {
           // 👇 This tells Jenkins to go to the parent directory
           dir('../') {
