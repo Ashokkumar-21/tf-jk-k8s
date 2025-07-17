@@ -69,6 +69,8 @@ resource "aws_ecr_repository" "static_nginx" {
     scan_on_push = true
   }
 
+force_delete = true
+
   tags = {
     Name = "static-nginx"
     Environment = "dev"
